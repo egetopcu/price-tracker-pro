@@ -1,0 +1,2 @@
+1.Build a scraper
+2.Save data
