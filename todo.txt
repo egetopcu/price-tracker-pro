@@ -1,2 +1,6 @@
-1.Build a scraper
-2.Save data
+1.Build a scraper for 1 site +
+2.Upgrade dcraper to multiple products +
+3.Store values
+4.Add multiple sites(Wunder and Boyner)
+5.Add dollar based price history
+6......
