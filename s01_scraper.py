@@ -1,5 +1,5 @@
 from hmac import new
-import requests, json
+import requests, json, re
 from bs4 import BeautifulSoup
 
 def scrape():
@@ -15,7 +15,9 @@ def scrape():
         if "wunder.com" in item["url"]:
             results.append(scrape_wunder(item["url"], headers))
         if "boyner.com" in item["url"]:
-            continue
+            results.append(scrape_boyner(item["url"], headers))
+        if "barcin.com" in item["url"]:
+            results.append(scrape_barcin(item["url"], headers))
     return results
 
 def scrape_beymen(url,headers):
@@ -49,7 +51,28 @@ def scrape_wunder(url,headers):
                 first_offer = offers[0] if isinstance(offers, list) else offers
                 return float(first_offer.get("price"))
 
-
 def scrape_boyner(url,headers):
     resp = requests.get(url, headers=headers)
+
+    html = resp.text
+
+    match = re.search(r'"PriceInfo":\{"Price":"([\d.,]+)"', html)
+    price = match.group(1) if match else None
+
+    return price
+
+def scrape_barcin(url,headers):
+    resp = requests.get(url, headers=headers)
     soup = BeautifulSoup(resp.text, "html.parser")
+
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        
+        if data.get("@type") == "Product":
+            offers = data.get("offers", [])
+            if offers:
+                first_offer = offers[0] if isinstance(offers, list) else offers
+                return float(first_offer.get("price"))
