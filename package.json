@@ -18,10 +18,13 @@
   },
   "homepage": "https://github.com/egetopcu/price-tracker-pro#readme",
   "dependencies": {
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "playwright": "^1.62.1",
     "typescript": "^7.0.2"
   }
 }
