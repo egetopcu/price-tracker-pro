@@ -15,8 +15,22 @@ async function getBeymenPrice(url: string) {
   const lastPrice = html.match(/class="m-price__lastPrice"[^>]*>([^<]+)</)?.[1]?.trim() ?? null;
   const campaignDesc = html.match(/m-price__campaignDesc">\s*([^<]+?)\s*</)?.[1]?.trim() ?? null;
 
-  
-  return { newPrice, campaignPrice, lastPrice, campaignDesc };
+
+  if(campaignPrice&&campaignDesc?.includes("Sepette")||campaignPrice&&campaignDesc?.includes("Visa ile")){
+    return campaignPrice
+  }else if(campaignPrice){
+    if(lastPrice){
+      return (lastPrice+","+campaignPrice+campaignDesc)
+    }else{
+      return (newPrice+","+campaignPrice+campaignDesc)
+    }
+  }else if(lastPrice){
+    return lastPrice
+  }else if(newPrice){
+    return newPrice
+  }else{
+    return null
+  }
 }
 
 
@@ -56,7 +70,7 @@ async function main() {
       const price = await getBeymenPrice(url);
       console.log(price);
     }else if(url.includes("boyner")){
-      continue
+      //continue
       const price = await getBoynerPrice(url);
       console.log(price);
     }
