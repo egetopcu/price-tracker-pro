@@ -6,7 +6,26 @@ import { chromium } from "playwright";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 
-async function getCalvinKleinPrice(url: string){
+async function getWunderPrice(url:string) {
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+    },
+  });
+  const html = await res.text(); 
+
+  const price = html.match(/"price"\s*:\s*"([\d.]+)"/)?.[1] ?? null;
+  
+  if (price){
+    return [parseFloat(price)]
+  }else{
+    return null
+  }
+
+}
+
+
+async function getCalvinKleinPrice(url:string){
   const res = await fetch(url, {
     headers: {
       'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
@@ -24,7 +43,7 @@ async function getCalvinKleinPrice(url: string){
 }
   
 
-async function getBeymenPrice(url: string) {
+async function getBeymenPrice(url:string) {
   const res = await fetch(url, {
     headers: {
       'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
@@ -66,14 +85,13 @@ async function getBeymenPrice(url: string) {
 }
 
 
-async function getBoynerPrice(url: string) {
+async function getBoynerPrice(url:string) {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     });
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 3000 });
-    await page.waitForTimeout(500);
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 2000 });
 
     const html = await page.content();
 
@@ -107,6 +125,9 @@ async function main() {
     }else if(url.includes("tr.calvinklein.com")){
       const price = await getCalvinKleinPrice(url);
       console.log(price);
+    }else if(url.includes("wunder.com")){
+      const price = await getWunderPrice(url);
+      console.log(price)
     }
   }
 }
