@@ -3,31 +3,63 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from "playwright";
 
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+
+async function getCalvinKleinPrice(url: string){
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+    },
+  });
+  const html = await res.text(); 
+
+  const price = html.match(/itemprop="price"\s+content="([^"]+)"/)?.[1] ?? null;
+
+  if (price){
+    return [parseFloat(price)]
+  }else{
+    return null
+  }
+}
+  
+
 async function getBeymenPrice(url: string) {
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+    },
+  });
   const html = await res.text();
   
-  const campaignPrice = html.match(/m-price__campaignPrice">\s*([^<]+?)\s*</)?.[1]?.trim() ?? null;
   const newPrice = html.match(/id="priceNew"[^>]*>([^<]+)</)?.[1]?.trim() ?? null;
   const lastPrice = html.match(/class="m-price__lastPrice"[^>]*>([^<]+)</)?.[1]?.trim() ?? null;
+  const campaignPrice = html.match(/m-price__campaignPrice">\s*([^<]+?)\s*</)?.[1]?.trim() ?? null;
   const campaignDesc = html.match(/m-price__campaignDesc">\s*([^<]+?)\s*</)?.[1]?.trim() ?? null;
 
+  const newPriceInt = newPrice !== null 
+  ? parseFloat(newPrice.replace(".","").replace(",",".")) 
+  : null;
+  const lastPriceInt = lastPrice !== null 
+  ? parseFloat(lastPrice.replace(".","").replace(",",".")) 
+  : null;
+  const campaignPriceInt = campaignPrice !== null 
+  ? parseFloat(campaignPrice.replace(".","").replace(",",".")) 
+  : null;
 
-  if(campaignPrice&&campaignDesc?.includes("Sepette")||campaignPrice&&campaignDesc?.includes("Visa ile")){
-    return campaignPrice
-  }else if(campaignPrice){
-    if(lastPrice){
-      return (lastPrice+","+campaignPrice+campaignDesc)
+  if(campaignPriceInt&&campaignDesc?.includes("Sepette")||campaignPriceInt&&campaignDesc?.includes("Visa ile")){
+    return [campaignPriceInt]
+  }else if(campaignPriceInt){
+    const campaignDescU=campaignDesc?.replace("&#220;","U")
+    if(lastPriceInt){
+      return [lastPriceInt,campaignPriceInt,campaignDescU]
     }else{
-      return (newPrice+","+campaignPrice+campaignDesc)
+      return [newPriceInt,campaignPriceInt,campaignDescU]
     }
-  }else if(lastPrice){
-    return lastPrice
-  }else if(newPrice){
-    return newPrice
+  }else if(lastPriceInt){
+    return [lastPriceInt]
+  }else if(newPriceInt){
+    return [newPriceInt]
   }else{
     return null
   }
@@ -51,7 +83,7 @@ async function getBoynerPrice(url: string) {
         const items = Array.isArray(data['@graph']) ? data['@graph'] : [data];
         const product = items.find((item: any) => item['@type'] === 'Product');
         if (product?.offers?.price) {
-          return product.offers.price;
+          return [product.offers.price];
         }
     }
     return null;
@@ -66,21 +98,17 @@ async function main() {
   const urls: string[] = JSON.parse(raw);
 
   for (const url of urls) {
-    if (url.includes("beymen")){
+    if (url.includes("beymen.com")){
       const price = await getBeymenPrice(url);
       console.log(price);
-    }else if(url.includes("boyner")){
-      //continue
+    }else if(url.includes("boyner.com")){
       const price = await getBoynerPrice(url);
+      console.log(price);
+    }else if(url.includes("tr.calvinklein.com")){
+      const price = await getCalvinKleinPrice(url);
       console.log(price);
     }
   }
 }
 
 main();
-
-
-  /*  getBeymenPrice("https://www.beymen.com/tr/p_on-erkek-sneaker_1904609")
-    .then(price => console.log(price)) // 14250
-    .catch(console.error);
-*/
