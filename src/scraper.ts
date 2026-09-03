@@ -19,7 +19,7 @@ async function getWunderPrice(url:string) {
   const price = html.match(/"price"\s*:\s*"([\d.]+)"/)?.[1] ?? null;
   
   if (price){
-    return [parseFloat(price)]
+    return [url,parseFloat(price)]
   }else{
     return null
   }
@@ -38,7 +38,7 @@ async function getCalvinKleinPrice(url:string){
   const price = html.match(/itemprop="price"\s+content="([^"]+)"/)?.[1] ?? null;
 
   if (price){
-    return [parseFloat(price)]
+    return [url,parseFloat(price)]
   }else{
     return null
   }
@@ -69,18 +69,18 @@ async function getBeymenPrice(url:string) {
   : null;
 
   if(campaignPriceInt&&campaignDesc?.includes("Sepette")||campaignPriceInt&&campaignDesc?.includes("Visa ile")){
-    return [campaignPriceInt]
+    return [url,campaignPriceInt]
   }else if(campaignPriceInt){
     const campaignDescU=campaignDesc?.replace("&#220;","U")
     if(lastPriceInt){
-      return [lastPriceInt,campaignPriceInt,campaignDescU]
+      return [url,lastPriceInt,campaignPriceInt,campaignDescU]
     }else{
-      return [newPriceInt,campaignPriceInt,campaignDescU]
+      return [url,newPriceInt,campaignPriceInt,campaignDescU]
     }
   }else if(lastPriceInt){
-    return [lastPriceInt]
+    return [url,lastPriceInt]
   }else if(newPriceInt){
-    return [newPriceInt]
+    return [url,newPriceInt]
   }else{
     return null
   }
@@ -103,7 +103,7 @@ async function getBoynerPrice(url:string) {
         const items = Array.isArray(data['@graph']) ? data['@graph'] : [data];
         const product = items.find((item: any) => item['@type'] === 'Product');
         if (product?.offers?.price) {
-          return [product.offers.price];
+          return [url,product.offers.price];
         }
     }
     return null;
