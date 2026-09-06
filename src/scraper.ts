@@ -6,7 +6,21 @@ import { chromium } from "playwright";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+type ScrapedProduct = {
+  url: string;
+  price: number;
+  discountPrice: number | null;
+  note: string | null;
+};
 
+function makeProduct(
+  url: string,
+  price: number,
+  discountPrice: number | null = null,
+  note: string | null = null,
+): ScrapedProduct {
+  return { url, price: Number(price), discountPrice, note };
+}
 
 async function getWunderPrice(url:string) {
   const res = await fetch(url, {
@@ -115,7 +129,7 @@ async function getBoynerPrice(url:string) {
 
 export async function scraper() {
 
-  const raw = await readFile(path.join(__dirname, 'products.json'), 'utf8');
+  const raw = await readFile(path.join(__dirname, 'scraperProducts.json'), 'utf8');
   const urls: string[] = JSON.parse(raw);
   
   const products = []
@@ -130,6 +144,9 @@ export async function scraper() {
       const price = await getCalvinKleinPrice(url);
       products.push(price)
     }else if(url.includes("wunder.com")){
+      const price = await getWunderPrice(url);
+      products.push(price)
+    }else if(url.includes("barcin.com")){
       const price = await getWunderPrice(url);
       products.push(price)
     }
