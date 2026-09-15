@@ -6,20 +6,20 @@ import { chromium } from "playwright";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-type ScrapedProduct = {
+export type ScrapedProduct = {
   url: string;
   price: number;
-  discountPrice: number | null;
+  campaignPrice: number | null;
   note: string | null;
 };
 
 function makeProduct(
   url: string,
   price: number,
-  discountPrice: number | null = null,
+  campaignPrice: number | null = null,
   note: string | null = null,
 ): ScrapedProduct {
-  return { url, price: Number(price), discountPrice, note };
+  return { url, price: Number(price), campaignPrice, note };
 }
 
 async function getWunderPrice(url:string) {
@@ -33,7 +33,7 @@ async function getWunderPrice(url:string) {
   const price = html.match(/"price"\s*:\s*"([\d.]+)"/)?.[1] ?? null;
   
   if (price){
-    return [url,parseFloat(price)]
+    return makeProduct(url,parseInt(price));
   }else{
     return null
   }
@@ -52,7 +52,7 @@ async function getCalvinKleinPrice(url:string){
   const price = html.match(/itemprop="price"\s+content="([^"]+)"/)?.[1] ?? null;
 
   if (price){
-    return [url,parseFloat(price)]
+    return makeProduct(url,parseInt(price));
   }else{
     return null
   }
@@ -73,28 +73,28 @@ async function getBeymenPrice(url:string) {
   const campaignDesc = html.match(/m-price__campaignDesc">\s*([^<]+?)\s*</)?.[1]?.trim() ?? null;
 
   const newPriceInt = newPrice !== null 
-  ? parseFloat(newPrice.replace(".","").replace(",",".")) 
+  ? parseInt(newPrice.replace(".","").replace(",",".")) 
   : null;
   const lastPriceInt = lastPrice !== null 
-  ? parseFloat(lastPrice.replace(".","").replace(",",".")) 
+  ? parseInt(lastPrice.replace(".","").replace(",",".")) 
   : null;
   const campaignPriceInt = campaignPrice !== null 
-  ? parseFloat(campaignPrice.replace(".","").replace(",",".")) 
+  ? parseInt(campaignPrice.replace(".","").replace(",",".")) 
   : null;
 
   if(campaignPriceInt&&campaignDesc?.includes("Sepette")||campaignPriceInt&&campaignDesc?.includes("Visa ile")){
-    return [url,campaignPriceInt]
+    return makeProduct(url, campaignPriceInt);
   }else if(campaignPriceInt){
     const campaignDescU=campaignDesc?.replace("&#220;","U")
     if(lastPriceInt){
-      return [url,lastPriceInt,campaignPriceInt,campaignDescU]
-    }else{
-      return [url,newPriceInt,campaignPriceInt,campaignDescU]
+      return makeProduct(url,lastPriceInt,campaignPriceInt,campaignDescU);
+    }else if(newPriceInt){
+      return makeProduct(url,newPriceInt,campaignPriceInt,campaignDescU);
     }
   }else if(lastPriceInt){
-    return [url,lastPriceInt]
+    return makeProduct(url,lastPriceInt);
   }else if(newPriceInt){
-    return [url,newPriceInt]
+    return makeProduct(url,newPriceInt);
   }else{
     return null
   }
@@ -117,7 +117,7 @@ async function getBoynerPrice(url:string) {
         const items = Array.isArray(data['@graph']) ? data['@graph'] : [data];
         const product = items.find((item: any) => item['@type'] === 'Product');
         if (product?.offers?.price) {
-          return [url,product.offers.price];
+          return makeProduct(url, Number(parseInt(product.offers.price)));
         }
     }
     return null;
