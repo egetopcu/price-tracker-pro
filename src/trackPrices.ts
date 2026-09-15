@@ -12,7 +12,6 @@ import { scraper } from './scraper';
           console.log(null)
         }
       }
-      //console.log("Scraped Products:", products);
     } catch (error) {
       console.error("Scraping failed:", error);
     }
