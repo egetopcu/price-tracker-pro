@@ -33,9 +33,9 @@ async function getWunderPrice(url:string) {
   const price = html.match(/"price"\s*:\s*"([\d.]+)"/)?.[1] ?? null;
   
   if (price){
-    return makeProduct(url,parseInt(price));
+    return makeProduct(url, parseInt(price));
   }else{
-    return null
+    return makeProduct(url, -1)
   }
 
 }
@@ -54,7 +54,7 @@ async function getCalvinKleinPrice(url:string){
   if (price){
     return makeProduct(url,parseInt(price));
   }else{
-    return null
+    return makeProduct(url, -1)
   }
 }
   
@@ -96,8 +96,9 @@ async function getBeymenPrice(url:string) {
   }else if(newPriceInt){
     return makeProduct(url,newPriceInt);
   }else{
-    return null
+    return makeProduct(url, -1)
   }
+  return makeProduct(url, -1)
 }
 
 
@@ -120,7 +121,7 @@ async function getBoynerPrice(url:string) {
           return makeProduct(url, Number(parseInt(product.offers.price)));
         }
     }
-    return null;
+    return makeProduct(url, -1);
   } finally {
     await browser.close();
   }
