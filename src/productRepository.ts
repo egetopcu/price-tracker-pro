@@ -1,10 +1,10 @@
 // saveProducts(), getPriceHistory(), etc.
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq, and, gt, ne} from 'drizzle-orm';
+import { and, or, eq, ne, isNull, isNotNull } from 'drizzle-orm';
 import { productsTable } from './db/schema';
 const db = drizzle(process.env.DATABASE_URL!);
-import { scraper, type ScrapedProduct } from './scraper';
+import {type ScrapedProduct } from './scraper';
 
 
 export async function saveProducts(scrapedProduct: ScrapedProduct) {
@@ -67,15 +67,6 @@ export async function updateCampaign(scrapedProduct:ScrapedProduct) {
     console.log('Product campaign info updated!')
 }
 
-export async function updateProductPrice(scrapedProduct:ScrapedProduct){
-    await db
-        .update(productsTable)
-        .set({
-            price: scrapedProduct.price,
-        })
-        .where(eq(productsTable.url, scrapedProduct.url));
-    console.log('Product price info updated!')
-}
 
 export async function updateProductPriceIfChanged(scrapedProduct: ScrapedProduct) {
     const updated = await db
@@ -84,31 +75,45 @@ export async function updateProductPriceIfChanged(scrapedProduct: ScrapedProduct
     .where(
         and(
             eq(productsTable.url, scrapedProduct.url),
-            ne(productsTable.price, scrapedProduct.price) // only if the price changed
+            ne(productsTable.price, scrapedProduct.price)
         )
     )
     .returning({ name: productsTable.name, price: productsTable.price });
     
     if (updated.length > 0) {
-        console.log("Price changed, product updated!");
+        console.log("Price updated!");
     }
     return updated.length > 0;
 }
 
 
+export async function updateCampaignIfChanged(scrapedProduct: ScrapedProduct) {
+    const { campaignPrice } = scrapedProduct;
 
+    const priceChanged =
+        campaignPrice === null
+            ? isNotNull(productsTable.price_campaign)
+            : or(
+                  isNull(productsTable.price_campaign),
+                  ne(productsTable.price_campaign, campaignPrice)
+              );
 
+    const updated = await db
+        .update(productsTable)
+        .set({
+            price_campaign: campaignPrice,
+            campaing_desc: scrapedProduct.note,
+        })
+        .where(
+            and(
+                eq(productsTable.url, scrapedProduct.url),
+                priceChanged
+            )
+        )
+        .returning({ name: productsTable.name, price: productsTable.price });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if (updated.length > 0) {
+        console.log("Campaign updated!");
+    }
+    return updated.length > 0;
+}

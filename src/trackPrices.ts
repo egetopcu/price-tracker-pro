@@ -1,14 +1,7 @@
-import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
-import { productsTable } from './db/schema';
-
-
-const db = drizzle(process.env.DATABASE_URL!);
 //MAIN
 // orchestrator: calls scraper, then repository
-import { scraper, type ScrapedProduct } from './scraper';
-import { saveProducts, productExists, deleteProduct, updateProductPrice, updateCampaign} from './productRepository';
+import { scraper } from './scraper';
+import { saveProducts, productExists, deleteProduct, updateProductPriceIfChanged, updateCampaignIfChanged} from './productRepository';
 
 async function main(){
     try {
@@ -16,8 +9,10 @@ async function main(){
       for(const product of products){
         if (await productExists(product.url)){
           if(product.price!=-1){
-            updateProductPrice(product);
-            updateCampaign(product);
+            updateProductPriceIfChanged(product);
+            if (product.url.includes("beymen")){
+              updateCampaignIfChanged(product);
+            }
           }else{
             deleteProduct(product);
           }
