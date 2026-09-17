@@ -8,17 +8,24 @@ const db = drizzle(process.env.DATABASE_URL!);
 //MAIN
 // orchestrator: calls scraper, then repository
 import { scraper, type ScrapedProduct } from './scraper';
-import { saveProducts, productExists } from './productRepository';
+import { saveProducts, productExists, deleteProduct, updateProductPrice, updateCampaign} from './productRepository';
 
 async function main(){
     try {
       const products = await scraper();
       for(const product of products){
         if (await productExists(product.url)){
-          //saveProducts(product);
-          console.log(product)
+          if(product.price!=-1){
+            updateProductPrice(product);
+            updateCampaign(product);
+          }else{
+            deleteProduct(product);
+          }
+          
         }else{
-          console.log(null)
+          if(product.price!=-1){
+            saveProducts(product);
+          }
         }
       }
     } catch (error) {
