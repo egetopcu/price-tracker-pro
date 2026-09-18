@@ -6,6 +6,9 @@ import { productsTable } from './db/schema';
 const db = drizzle(process.env.DATABASE_URL!);
 import {type ScrapedProduct } from './scraper';
 
+import { readFile, writeFile } from "node:fs/promises";
+const path = "./src/scraperProducts.json";
+
 
 export async function saveProducts(scrapedProduct: ScrapedProduct) {
     const product: typeof productsTable.$inferInsert = {
@@ -38,8 +41,6 @@ export function productName(url: string): string {
 
 
 
-
-
 export async function productExists(url: string): Promise<boolean> {
     const result = await db
       .select({ price: productsTable.price })
@@ -55,17 +56,6 @@ export async function deleteProduct(scrapedProduct:ScrapedProduct) {
     console.log('Product deleted!')
 }
 
-
-export async function updateCampaign(scrapedProduct:ScrapedProduct) {
-    await db
-    .update(productsTable)
-    .set({
-        price_campaign: scrapedProduct.campaignPrice,
-        campaing_desc: scrapedProduct.note
-    })
-    .where(eq(productsTable.url, scrapedProduct.url));
-    console.log('Product campaign info updated!')
-}
 
 
 export async function updateProductPriceIfChanged(scrapedProduct: ScrapedProduct) {
@@ -116,4 +106,12 @@ export async function updateCampaignIfChanged(scrapedProduct: ScrapedProduct) {
         console.log("Campaign updated!");
     }
     return updated.length > 0;
+}
+
+export async function deleteJsonUrl(scrapedProduct: ScrapedProduct) {
+    const items: string[] = JSON.parse(await readFile(path, "utf8"));
+    const updated = items.filter((item) => item !== scrapedProduct.url);
+
+    await writeFile(path, JSON.stringify(updated, null, 2));
+    console.log("Product sold out, removed!")
 }

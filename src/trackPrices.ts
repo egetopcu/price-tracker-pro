@@ -1,28 +1,36 @@
 //MAIN
 // orchestrator: calls scraper, then repository
 import { scraper } from './scraper';
-import { saveProducts, productExists, deleteProduct, updateProductPriceIfChanged, updateCampaignIfChanged} from './productRepository';
+import { saveProducts, productExists, deleteProduct, updateProductPriceIfChanged, updateCampaignIfChanged, deleteJsonUrl} from './productRepository';
 
 async function main(){
     try {
+
       const products = await scraper();
+
       for(const product of products){
+
         if (await productExists(product.url)){
           if(product.price!=-1){
-            updateProductPriceIfChanged(product);
+            await updateProductPriceIfChanged(product);
             if (product.url.includes("beymen")){
-              updateCampaignIfChanged(product);
+              await updateCampaignIfChanged(product);
             }
           }else{
-            deleteProduct(product);
-          }
-          
+            await deleteProduct(product);
+          }          
         }else{
           if(product.price!=-1){
-            saveProducts(product);
+            await saveProducts(product);
           }
         }
+
+        if(product.price==-1){
+          await deleteJsonUrl(product);
+        }
+
       }
+
     } catch (error) {
       console.error("Scraping failed:", error);
     }

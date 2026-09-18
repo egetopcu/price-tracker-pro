@@ -6,3 +6,4 @@ generated/
 .DS_Store
 .vscode/
 /src/generated/prisma
+/src/scraperProducts.json
