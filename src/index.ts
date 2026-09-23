@@ -9,7 +9,7 @@ async function main() {
     const product: typeof productsTable.$inferInsert = {
         name: "sneakerRed",
         url: 'sneakershop.com/redsneaker',
-        price: 5000
+        base_price: 5000
       };
 
 
@@ -27,7 +27,7 @@ async function main() {
     await db
     .update(productsTable)
     .set({
-      price: 6000,
+      base_price: 6000,
     })
     .where(eq(productsTable.name, product.name));
   console.log('Product info updated!')

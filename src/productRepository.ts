@@ -14,9 +14,7 @@ export async function saveProducts(scrapedProduct: ScrapedProduct) {
     const product: typeof productsTable.$inferInsert = {
         name: productName(scrapedProduct.url),
         url: scrapedProduct.url,
-        price: scrapedProduct.price,
-        price_campaign: scrapedProduct.campaignPrice,
-        campaing_desc: scrapedProduct.note
+        base_price: scrapedProduct.base_price
       };
 
       await db.insert(productsTable).values(product);

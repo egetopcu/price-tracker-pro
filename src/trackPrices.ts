@@ -10,25 +10,6 @@ async function main(){
 
       for(const product of products){
 
-        if (await productExists(product.url)){
-          if(product.price!=-1){
-            await updateProductPriceIfChanged(product);
-            if (product.url.includes("beymen")){
-              await updateCampaignIfChanged(product);
-            }
-          }else{
-            await deleteProduct(product);
-          }          
-        }else{
-          if(product.price!=-1){
-            await saveProducts(product);
-          }
-        }
-
-        if(product.price==-1){
-          await deleteJsonUrl(product);
-        }
-
       }
 
     } catch (error) {
@@ -36,4 +17,24 @@ async function main(){
     }
   };
   
-main();
+
+  async function test() {
+    try {
+      const products = await scraper();
+      for(const product of products){
+        console.log(product);
+      }
+    } catch (error) {
+      console.error("Test scraping failed:", error);
+    }
+  };
+  
+  
+//main();
+
+
+test();
+
+
+
+
