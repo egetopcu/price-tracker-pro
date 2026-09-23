@@ -41,7 +41,7 @@ export function productName(url: string): string {
 
 export async function productExists(url: string): Promise<boolean> {
     const result = await db
-      .select({ price: productsTable.price })
+      .select({ base_price: productsTable.base_price })
       .from(productsTable)
       .where(eq(productsTable.url, url))
       .limit(1);
