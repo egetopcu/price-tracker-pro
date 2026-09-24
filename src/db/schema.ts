@@ -12,7 +12,7 @@ export const pricesTable = pgTable("prices", {
   price_id: integer().primaryKey().generatedAlwaysAsIdentity(),
 
   price: integer().notNull(),
-  price_campaign: integer(),
+  campaign_price: integer(),
   campaing_desc: varchar({ length: 255 }),
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 },

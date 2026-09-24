@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { and, or, eq, ne, isNull, isNotNull } from 'drizzle-orm';
-import { productsTable } from './db/schema';
+import { productsTable, pricesTable } from './db/schema';
 const db = drizzle(process.env.DATABASE_URL!);
 import {type ScrapedProduct } from './scraper';
 
@@ -10,16 +10,26 @@ import { readFile, writeFile } from "node:fs/promises";
 const path = "./src/scraperProducts.json";
 
 
-export async function saveProducts(scrapedProduct: ScrapedProduct) {
-    const product: typeof productsTable.$inferInsert = {
-        name: productName(scrapedProduct.url),
-        url: scrapedProduct.url,
-        base_price: scrapedProduct.base_price
-      };
 
-      await db.insert(productsTable).values(product);
-      console.log('New product created!')
+export async function saveTrackedProduct(scrapedProduct: ScrapedProduct){
+  const product = await saveProduct(scrapedProduct);
+  const p_id=product.product_id
+  await savePrice(scrapedProduct, p_id)
+}
 
+
+
+
+async function saveProduct(scrapedProduct: ScrapedProduct) {
+  const product: typeof productsTable.$inferInsert = {
+      name: productName(scrapedProduct.url),
+      url: scrapedProduct.url,
+      base_price: scrapedProduct.base_price
+    };
+
+    const [r_product] = await db.insert(productsTable).values(product).returning({ product_id: productsTable.product_id });
+    console.log('New product created!')
+    return r_product
 }
 
 export function productName(url: string): string {
@@ -36,6 +46,17 @@ export function productName(url: string): string {
     .join(" ");
 }
 
+export async function savePrice(scrapedProduct: ScrapedProduct, product_id: number){
+  const price: typeof pricesTable.$inferInsert = {
+    product_id: product_id,
+    price: scrapedProduct.curr_price,
+    campaign_price: scrapedProduct.campaign_price,
+    campaing_desc: scrapedProduct.campaign_desc
+  };
+
+  await db.insert(pricesTable).values(price);
+  console.log('New product price created!')
+}
 
 
 
@@ -54,57 +75,6 @@ export async function deleteProduct(scrapedProduct:ScrapedProduct) {
     console.log('Product deleted!')
 }
 
-
-
-export async function updateProductPriceIfChanged(scrapedProduct: ScrapedProduct) {
-    const updated = await db
-    .update(productsTable)
-    .set({ price: scrapedProduct.price })
-    .where(
-        and(
-            eq(productsTable.url, scrapedProduct.url),
-            ne(productsTable.price, scrapedProduct.price)
-        )
-    )
-    .returning({ name: productsTable.name, price: productsTable.price });
-    
-    if (updated.length > 0) {
-        console.log("Price updated!");
-    }
-    return updated.length > 0;
-}
-
-
-export async function updateCampaignIfChanged(scrapedProduct: ScrapedProduct) {
-    const { campaignPrice } = scrapedProduct;
-
-    const priceChanged =
-        campaignPrice === null
-            ? isNotNull(productsTable.price_campaign)
-            : or(
-                  isNull(productsTable.price_campaign),
-                  ne(productsTable.price_campaign, campaignPrice)
-              );
-
-    const updated = await db
-        .update(productsTable)
-        .set({
-            price_campaign: campaignPrice,
-            campaing_desc: scrapedProduct.note,
-        })
-        .where(
-            and(
-                eq(productsTable.url, scrapedProduct.url),
-                priceChanged
-            )
-        )
-        .returning({ name: productsTable.name, price: productsTable.price });
-
-    if (updated.length > 0) {
-        console.log("Campaign updated!");
-    }
-    return updated.length > 0;
-}
 
 export async function deleteJsonUrl(scrapedProduct: ScrapedProduct) {
     const items: string[] = JSON.parse(await readFile(path, "utf8"));
