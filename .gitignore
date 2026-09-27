@@ -11,6 +11,10 @@ node_modules/
 .env
 .env*.local
 
-.expo/
+frontend/.expo/
 dist/
 web-build/
+
+
+frontend/ios/
+frontend/android
