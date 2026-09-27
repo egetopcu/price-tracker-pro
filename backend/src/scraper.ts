@@ -222,14 +222,10 @@ export async function scraper() {
   return products
 }
 
-async function getMaviPrice(url:string) {
+async function getMaviPrice(url: string) {
   
 }
 
-async function getHMPrice(url:string) {
-  
-}
-
-async function getZaraPrice(url:string) {
+async function getLCWaikiki(url: string) {
   
 }

@@ -70,6 +70,17 @@ export async function productExists(url: string): Promise<boolean> {
     return result.length > 0;
 }
 
+
+export async function getProductid(url: string){
+  const [id] = await db
+    .select({ product_id: productsTable.product_id})
+    .from(productsTable)
+    .where(eq(productsTable.url, url))
+
+  return id.product_id
+}
+
+
 export async function deleteProduct(scrapedProduct:ScrapedProduct) {
     await db.delete(productsTable).where(eq(productsTable.url, scrapedProduct.url));
     console.log('Product deleted!')
