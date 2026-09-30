@@ -1,10 +1,9 @@
-// saveProducts(), getPriceHistory(), etc.
 import 'dotenv/config';
+import { eq ,ne} from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { and, or, eq, ne, isNull, isNotNull } from 'drizzle-orm';
-import { productsTable, pricesTable } from './db/schema';
+import { pricesTable, productsTable } from './db/schema';
+import { type ScrapedProduct } from './scraper';
 const db = drizzle(process.env.DATABASE_URL!);
-import {type ScrapedProduct } from './scraper';
 
 import { readFile, writeFile } from "node:fs/promises";
 const path = "./src/scraperProducts.json";
@@ -16,8 +15,6 @@ export async function saveTrackedProduct(scrapedProduct: ScrapedProduct){
   const p_id=product.product_id
   await savePrice(scrapedProduct, p_id)
 }
-
-
 
 
 async function saveProduct(scrapedProduct: ScrapedProduct) {

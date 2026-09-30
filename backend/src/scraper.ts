@@ -1,10 +1,7 @@
-// scrapeOne, scrapeMany — pure, returns ScrapedProduct[]
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { chromium } from "playwright";
-import { string } from 'drizzle-orm/cockroach-core';
-import { make } from 'drizzle-orm/effect-sqlite-do';
+import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -202,17 +199,17 @@ export async function scraper() {
   const products = []
   for (const url of urls) {
     if (url.includes("beymen.com")){
-      //const price = await getBeymenPrice(url)
-      //products.push(price)
+      const price = await getBeymenPrice(url)
+      products.push(price)
     }else if(url.includes("boyner.com")){
-      //const price = await getBoynerPrice(url)
-      //products.push(price)
+      const price = await getBoynerPrice(url)
+      products.push(price)
     }else if(url.includes("tr.calvinklein.com")){
-      //const price = await getCalvinKleinPrice(url)
-      //products.push(price)
+      const price = await getCalvinKleinPrice(url)
+      products.push(price)
     }else if(url.includes("wunder.com")){
-      //const price = await getWunderPrice(url);
-      //products.push(price)
+      const price = await getWunderPrice(url);
+      products.push(price)
     }else if(url.includes("barcin.com")){
       const price = await getBarcinPrices(url);
       products.push(price)

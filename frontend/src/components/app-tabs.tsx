@@ -27,6 +27,12 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="products">
+        <NativeTabs.Trigger.Label>Products</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon 
+          sf="cube"      />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

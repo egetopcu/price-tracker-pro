@@ -1,24 +1,8 @@
-//MAIN
-// orchestrator: calls scraper, then repository
+import { getProductid, productExists, savePrice, saveTrackedProduct } from './productRepository';
 import { scraper } from './scraper';
-import { productExists, deleteProduct, deleteJsonUrl, saveTrackedProduct, getProductid, savePrice} from './productRepository';
-
-
-async function main(){
-    try {
-
-      const products = await scraper();
-
-      for(const product of products){
-      }
-
-    } catch (error) {
-      console.error("Scraping failed:", error);
-    }
-  };
   
 
-  async function test() {
+  async function main() {
     try {
       const products = await scraper();
       for(const product of products){
@@ -37,10 +21,7 @@ async function main(){
   };
   
   
-//main();
-
-
-test();
+main();
 
 
 
