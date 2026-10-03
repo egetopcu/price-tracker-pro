@@ -191,32 +191,52 @@ async function getBoynerPrice(url:string) { // update needed: Clean and rewrite 
 }
 
 
-export async function scraper() {
-
-  const raw = await readFile(path.join(__dirname, 'scraperProducts.json'), 'utf8');
-  const urls: string[] = JSON.parse(raw);
+export async function scrapeMany(urls: string[]) {
   
   const products = []
   for (const url of urls) {
     if (url.includes("beymen.com")){
-      const price = await getBeymenPrice(url)
-      products.push(price)
+      const product = await getBeymenPrice(url)
+      products.push(product)
     }else if(url.includes("boyner.com")){
-      const price = await getBoynerPrice(url)
-      products.push(price)
+      const product = await getBoynerPrice(url)
+      products.push(product)
     }else if(url.includes("tr.calvinklein.com")){
-      const price = await getCalvinKleinPrice(url)
-      products.push(price)
+      const product = await getCalvinKleinPrice(url)
+      products.push(product)
     }else if(url.includes("wunder.com")){
-      const price = await getWunderPrice(url);
-      products.push(price)
+      const product = await getWunderPrice(url);
+      products.push(product)
     }else if(url.includes("barcin.com")){
-      const price = await getBarcinPrices(url);
-      products.push(price)
+      const product = await getBarcinPrices(url);
+      products.push(product)
     }
   }
   
   return products
+}
+
+export async function scrapeOne(url: string) {
+
+    if (url.includes("beymen.com")){
+      const product = await getBeymenPrice(url)
+      return product
+    }else if(url.includes("boyner.com")){
+      const product = await getBoynerPrice(url)
+      return product
+    }else if(url.includes("tr.calvinklein.com")){
+      const product = await getCalvinKleinPrice(url)
+      return product
+    }else if(url.includes("wunder.com")){
+      const product = await getWunderPrice(url);
+      return product
+    }else if(url.includes("barcin.com")){
+      const product = await getBarcinPrices(url);
+      return product
+    }else{
+      return null
+    }
+  
 }
 
 async function getMaviPrice(url: string) {

@@ -2,20 +2,25 @@ import 'dotenv/config';
 import { eq ,ne} from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { pricesTable, productsTable } from './db/schema';
-import { type ScrapedProduct } from './scraper';
+import { type ScrapedProduct, scrapeOne , scrapeMany} from './scraper';
 const db = drizzle(process.env.DATABASE_URL!);
 
 import { readFile, writeFile } from "node:fs/promises";
+import { url } from 'node:inspector/promises';
 const path = "./src/scraperProducts.json";
 
 
 
-export async function saveTrackedProduct(scrapedProduct: ScrapedProduct){
-  const product = await saveProduct(scrapedProduct);
+export async function saveProductandPrice(url: string){
+  const sProduct = await scrapeOne(url)
+  if (!sProduct) {
+    console.warn(`Skipping ${url}: nothing scraped`);
+    return null;
+  }
+  const product = await saveProduct(sProduct);
   const p_id=product.product_id
-  await savePrice(scrapedProduct, p_id)
+  await savePrice(sProduct, p_id)
 }
-
 
 async function saveProduct(scrapedProduct: ScrapedProduct) {
   const product: typeof productsTable.$inferInsert = {
@@ -48,12 +53,30 @@ export async function savePrice(scrapedProduct: ScrapedProduct, product_id: numb
     product_id: product_id,
     price: scrapedProduct.curr_price,
     campaign_price: scrapedProduct.campaign_price,
-    campaing_desc: scrapedProduct.campaign_desc
+    campaign_desc: scrapedProduct.campaign_desc
   };
 
   await db.insert(pricesTable).values(price);
   console.log('New product price created!')
 }
+
+export async function savePrices() {
+  const rowofurl = await db
+  .select({
+    url: productsTable.url})
+  .from(productsTable)
+
+  const urls = rowofurl.map((r) => r.url);
+  const products = await scrapeMany(urls)
+
+  for (const product of products){
+    const id =await getProductid(product.url)
+    await savePrice(product, id)
+    console.log('New product price created!')
+  }
+}
+
+
 
 
 
@@ -67,7 +90,6 @@ export async function productExists(url: string): Promise<boolean> {
     return result.length > 0;
 }
 
-
 export async function getProductid(url: string){
   const [id] = await db
     .select({ product_id: productsTable.product_id})
@@ -75,19 +97,4 @@ export async function getProductid(url: string){
     .where(eq(productsTable.url, url))
 
   return id.product_id
-}
-
-
-export async function deleteProduct(scrapedProduct:ScrapedProduct) {
-    await db.delete(productsTable).where(eq(productsTable.url, scrapedProduct.url));
-    console.log('Product deleted!')
-}
-
-
-export async function deleteJsonUrl(scrapedProduct: ScrapedProduct) {
-    const items: string[] = JSON.parse(await readFile(path, "utf8"));
-    const updated = items.filter((item) => item !== scrapedProduct.url);
-
-    await writeFile(path, JSON.stringify(updated, null, 2));
-    console.log("Product sold out, removed!")
 }

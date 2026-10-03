@@ -13,7 +13,7 @@ export const pricesTable = pgTable("prices", {
 
   price: integer().notNull(),
   campaign_price: integer(),
-  campaing_desc: varchar({ length: 255 }),
+  campaign_desc: varchar({ length: 255 }),
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 },
 (table) => [index("prices_product_id_idx").on(table.product_id)]

@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express, { Router, type Request, type Response } from 'express';
-import path from 'path';
 import { Pool } from 'pg';
 
 const router = Router();
@@ -8,7 +7,6 @@ const router = Router();
 
 router.use(express.json());
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const PRODUCTS_FILE: string = path.join(import.meta.dirname, 'scraperProducts.json');
 
 router.get('/', async (req: Request, res: Response) => {
     try {
@@ -76,8 +74,11 @@ router.get('/latestprice/:productid', async (req: Request, res: Response) => {
       console.error(err);
       res.status(500).json({ error: 'Database error' });
     }
-  });
+  })
   
+router.post('/', async (req: Request, res: Response) => {
+
+})
   
 
 export default router;
