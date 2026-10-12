@@ -17,8 +17,8 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query('SELECT * FROM products');
     res.json(rows);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -30,8 +30,8 @@ router.get('/:productid', async (req: Request, res: Response) => {
     [productid]
     );
     res.json(rows);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -52,8 +52,8 @@ router.post('/', async (req: Request, res: Response) => {
     }
     await saveProductandPrice(url)
     res.status(201).json({ message: 'URL added', url });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Could not save URL' });
   }
 

@@ -5,11 +5,6 @@ import { pricesTable, productsTable } from './db/schema';
 import { type ScrapedProduct, scrapeOne , scrapeMany} from './scraper';
 const db = drizzle(process.env.DATABASE_URL!);
 
-import { readFile, writeFile } from "node:fs/promises";
-import { url } from 'node:inspector/promises';
-const path = "./src/scraperProducts.json";
-
-
 
 export async function saveProductandPrice(url: string){
   const sProduct = await scrapeOne(url)
@@ -60,7 +55,7 @@ export async function savePrice(scrapedProduct: ScrapedProduct, product_id: numb
   console.log('New product price created!')
 }
 
-export async function savePrices() {
+export async function saveNewPrices() {
   const rowofurl = await db
   .select({
     url: productsTable.url})

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { Router, type Request, type Response } from 'express';
 import { Pool } from 'pg';
+import { saveNewPrices } from '../productRepository';
 
 const router = Router();
 
@@ -19,11 +20,33 @@ router.get('/', async (req: Request, res: Response) => {
          ORDER BY p.product_id`
       );
       res.json(rows);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       res.status(500).json({ error: 'Database error' });
     }
   });
+
+router.get('/latest', async (req: Request, res: Response) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT p.*,
+              to_json(r.*) AS latest_price
+        FROM products p
+        LEFT JOIN LATERAL (
+          SELECT *
+          FROM prices
+          WHERE prices.product_id = p.product_id
+          ORDER BY created_at DESC
+          LIMIT 1
+        ) r ON true
+        ORDER BY p.product_id`
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
 
 router.get('/:productid', async (req: Request, res: Response) => {
 const {productid}= req.params;
@@ -42,8 +65,8 @@ try{
     return res.status(404).json({ error: 'Product not found' });
     }
     res.json(rows[0]);
-}catch(err){
-    console.error(err);
+}catch(error){
+    console.error(error);
     res.status(500).json({ error: 'Database error' });
 }
 });
@@ -70,13 +93,19 @@ router.get('/latestprice/:productid', async (req: Request, res: Response) => {
         return res.status(404).json({ error: 'Product not found' });
       }
       res.json(rows[0]);
-    }catch(err){
-      console.error(err);
+    }catch(error){
+      console.error(error);
       res.status(500).json({ error: 'Database error' });
     }
   })
   
-router.post('/', async (req: Request, res: Response) => {
+router.post('/saveNewPrices', async (req: Request, res: Response) => {
+  try {
+    await saveNewPrices()
+    res.status(200).json({ message: 'Prices added' });
+  } catch (error) {
+    console.error(error);
+  }
 
 })
   
