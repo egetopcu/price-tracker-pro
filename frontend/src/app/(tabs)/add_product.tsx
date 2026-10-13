@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Text,
-  View,
-  TextInput,
-  Pressable,
-  ActivityIndicator,
-  StyleSheet,
-} from "react-native";
+import { Text,View, TextInput, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 import { globalStyles } from "@/styles/global";
 
 const API_URL = "http://localhost:4000";
@@ -36,7 +29,6 @@ export default function AddProduct() {
       const data = await res.json();
 
       if (!res.ok) {
-        // backend sends { error: "..." } for 400 / 409 / 500
         throw new Error(data.error ?? `HTTP ${res.status}`);
       }
 
@@ -48,6 +40,7 @@ export default function AddProduct() {
       setLoading(false);
     }
   };
+  
 
   return (
     <View style={globalStyles.container}>

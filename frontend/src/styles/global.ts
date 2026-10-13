@@ -8,6 +8,7 @@ export const colors = {
   text: 'rgb(219 213 213)',
   textSecondary: '#a0a0b0',
   alert: '#ff5252',
+  cardColor:"#ffffff22",
 };
 
 export const globalStyles = StyleSheet.create({
@@ -37,5 +38,11 @@ export const globalStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  card: {
+    padding: 12,
+    marginVertical: 6,
+    borderRadius: 10,
+    backgroundColor: colors.cardColor,
   },
 });

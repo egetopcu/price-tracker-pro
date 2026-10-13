@@ -53,11 +53,14 @@ const {productid}= req.params;
 try{
     const { rows } = await pool.query(
     `SELECT p.*,
-            COALESCE(json_agg(r.*) FILTER (WHERE r.product_id IS NOT NULL), '[]') AS prices
-        FROM products p
-        LEFT JOIN prices r ON r.product_id = p.product_id
-        WHERE p.product_id = $1
-        GROUP BY p.product_id`,
+       COALESCE(
+         json_agg(r.* ORDER BY r.created_at DESC) FILTER (WHERE r.product_id IS NOT NULL),
+         '[]'
+       ) AS prices
+    FROM products p
+    LEFT JOIN prices r ON r.product_id = p.product_id
+    WHERE p.product_id = $1
+    GROUP BY p.product_id`,
     [productid]
     );
     

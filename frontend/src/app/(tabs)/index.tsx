@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet, ActivityIndicator, FlatList, Linking, Pressable } from "react-native";
 import { useCallback, useState } from "react";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, router } from "expo-router";
 import { globalStyles } from "@/styles/global";
 
 const API_URL = "http://localhost:4000";
@@ -19,7 +19,7 @@ type Item = {
   name: string;
   url: string;
   base_price: number;
-  latest_price: Price | null;
+  latest_price: Price;
 };
 
 export default function Products() {
@@ -42,14 +42,12 @@ export default function Products() {
     }
   }, []);
 
-  // Reload every time this tab comes into view
   useFocusEffect(
     useCallback(() => {
       load();
     }, [load])
   );
 
-  // Pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
     await load();
@@ -68,16 +66,14 @@ export default function Products() {
         refreshing={refreshing}
         onRefresh={onRefresh}
         renderItem={({ item }) => (
-          <Pressable style={styles.card} onPress={() => Linking.openURL(item.url)}>
+          <Pressable style={globalStyles.card} onPress={() => router.push(`/product/${item.product_id}`)}>
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.price}>
-              ₺{item.base_price.toLocaleString("tr-TR")}
+              Retail: ₺{item.base_price.toLocaleString("tr-TR")}
             </Text>
-            {item.latest_price && (
-              <Text style={styles.price}>
-                Latest: ₺{item.latest_price.price.toLocaleString("tr-TR")}
-              </Text>
-            )}
+            <Text style={styles.price}>
+              Current: ₺{item.latest_price.price.toLocaleString("tr-TR")}
+            </Text>
           </Pressable>
         )}
       />
@@ -86,12 +82,6 @@ export default function Products() {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    padding: 12,
-    marginVertical: 6,
-    borderRadius: 10,
-    backgroundColor: "#ffffff22",
-  },
   name: { fontSize: 15, fontWeight: "600" },
   price: { fontSize: 14, marginTop: 4, opacity: 0.8 },
 });
