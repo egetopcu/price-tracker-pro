@@ -1,11 +1,9 @@
 import { Text, View, StyleSheet, ActivityIndicator, FlatList, Linking, Pressable } from "react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { globalStyles } from "@/styles/global";
 
-
-
-const API_URL = "http://localhost:4000"
-
+const API_URL = "http://localhost:4000";
 
 type Price = {
   price_id: number;
@@ -24,31 +22,39 @@ type Item = {
   latest_price: Price | null;
 };
 
-
-
 export default function Products() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_URL}/prices/latest`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json: Item[] = await res.json();
-        setItems(json);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+  const load = useCallback(async () => {
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/prices/latest`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json: Item[] = await res.json();
+      setItems(json);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  // Reload every time this tab comes into view
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
-
+  // Pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
 
   return (
     <View style={globalStyles.container}>
@@ -59,6 +65,8 @@ export default function Products() {
       <FlatList
         data={items}
         keyExtractor={(item) => String(item.product_id)}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({ item }) => (
           <Pressable style={styles.card} onPress={() => Linking.openURL(item.url)}>
             <Text style={styles.name}>{item.name}</Text>
@@ -73,11 +81,9 @@ export default function Products() {
           </Pressable>
         )}
       />
-
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   card: {
