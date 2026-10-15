@@ -1,16 +1,12 @@
 import 'dotenv/config';
 import express, { Router, type Request, type Response } from 'express';
-import { Pool } from 'pg';
+import { pool } from '../db/pool';
 import { saveProductandPrice , productExists} from '../productRepository';
 
 const router = Router();
 
 
 router.use(express.json());
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-
-//router.get('/ping', (req, res) => res.send('pong'));
 
 
 router.get('/', async (req: Request, res: Response) => {

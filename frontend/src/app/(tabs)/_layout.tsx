@@ -20,7 +20,7 @@ export default function TabLayout() {
         options={{
           title: 'Products',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name='home' size={size} color={color} />
+            <Ionicons name='home' size={size} color={color as string} />
           ),
         }}
       />
@@ -29,7 +29,7 @@ export default function TabLayout() {
         options={{
           title: 'Add Product',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name='add-circle' size={size} color={color} />
+            <Ionicons name='add-circle' size={size} color={color as string} />
           ),
         }}
       />

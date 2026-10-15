@@ -3,8 +3,9 @@ import { eq ,ne} from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { pricesTable, productsTable } from './db/schema';
 import { type ScrapedProduct, scrapeOne , scrapeMany} from './scraper';
-const db = drizzle(process.env.DATABASE_URL!);
+import { pool } from './db/pool';
 
+const db = drizzle({ client: pool });
 
 export async function saveProductandPrice(url: string){
   const sProduct = await scrapeOne(url)
@@ -67,7 +68,6 @@ export async function saveNewPrices() {
   for (const product of products){
     const id =await getProductid(product.url)
     await savePrice(product, id)
-    console.log('New product price created!')
   }
 }
 
