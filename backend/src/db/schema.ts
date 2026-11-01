@@ -1,4 +1,4 @@
-import { pgTable, uuid, serial,  integer, varchar, timestamp, index  } from "drizzle-orm/pg-core";
+import { pgTable, integer, varchar, timestamp, index  } from "drizzle-orm/pg-core";
 export const productsTable = pgTable("products", {
   product_id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),

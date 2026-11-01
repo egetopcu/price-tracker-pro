@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express, { Router, type Request, type Response } from 'express';
 import { pool } from '../db/pool';
-import { saveProductandPrice , productExists} from '../productRepository';
+import { saveProductandPrice , productExists, deleteProudct} from '../productRepository';
 
 const router = Router();
 
@@ -55,7 +55,16 @@ router.post('/', async (req: Request, res: Response) => {
 
 });
 
-
+router.delete('/delete/:productid', async (req: Request, res: Response) => {
+  const {productid}= req.params;
+  try {
+    const id =await deleteProudct(Number(productid))
+    res.status(200).json({ message: 'Product deleted', id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Could not delete product' });
+  }
+})
 
 
 export default router;

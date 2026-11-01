@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { eq ,ne} from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { pricesTable, productsTable } from './db/schema';
 import { type ScrapedProduct, scrapeOne , scrapeMany} from './scraper';
@@ -71,10 +71,6 @@ export async function saveNewPrices() {
   }
 }
 
-
-
-
-
 export async function productExists(url: string): Promise<boolean> {
     const result = await db
       .select({ base_price: productsTable.base_price })
@@ -92,4 +88,13 @@ export async function getProductid(url: string){
     .where(eq(productsTable.url, url))
 
   return id.product_id
+}
+
+export async function deleteProudct(id: number) {
+  const deleteUserId = await db
+  .delete(productsTable)
+  .where(eq(productsTable.product_id, id))
+  .returning({ deletedId: productsTable.product_id });
+
+  return deleteUserId
 }

@@ -91,9 +91,9 @@ export default function ProductHistory() {
             <Text style={styles.date}>{formatDate(item.created_at)}</Text>
             <Text style={styles.price}>{formatPrice(item.price)}</Text>
             {item.campaign_price != null && (
-              <Text style={styles.campaign}>
+              <Text style={globalStyles.campaign}>
                 Campaign: {formatPrice(item.campaign_price)}
-                {item.campaign_desc ? ` · ${item.campaign_desc}` : ""}
+                {` · ${item.campaign_desc}`}
               </Text>
             )}
           </View>
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontWeight: "700" },
   price: { fontSize: 14, marginTop: 4, opacity: 0.8 },
   date: { fontSize: 13, opacity: 0.6 },
-  campaign: { fontSize: 14, marginTop: 4, color: "#2e9e5b" },
   sectionTitle: { fontSize: 16, fontWeight: "600", marginTop: 20, marginBottom: 6 },
   linkButton: {
     marginTop: 12,

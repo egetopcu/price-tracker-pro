@@ -9,9 +9,14 @@ export const colors = {
   textSecondary: '#a0a0b0',
   alert: '#ff5252',
   cardColor:"#ffffff22",
+  campaignColor: "#2e9e5b",
 };
 
 export const globalStyles = StyleSheet.create({
+  campaign: { 
+    fontSize: 14, 
+    marginTop: 4, 
+    color: colors.campaignColor},
   container: {
     flex: 1,
     backgroundColor: colors.background,
