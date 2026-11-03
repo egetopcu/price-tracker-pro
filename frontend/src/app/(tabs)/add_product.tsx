@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Text,View, TextInput, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 import { globalStyles } from "@/styles/global";
 
-const API_URL = "http://localhost:4000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function AddProduct() {
   const [url, setUrl] = useState("");

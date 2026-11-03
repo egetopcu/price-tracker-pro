@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { globalStyles } from "@/styles/global";
 
-const API_URL = "http://localhost:4000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 type Price = {
   price_id: number;

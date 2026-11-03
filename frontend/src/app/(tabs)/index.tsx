@@ -6,7 +6,7 @@ import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable"
 import Reanimated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
 
-const API_URL = "http://localhost:4000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const ACTION_WIDTH = 80;
 
 
